@@ -1,0 +1,70 @@
+name: VM2 Issue Comment TI Provenance 260922
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+
+jobs:
+  provenance:
+    if: >-
+      github.event.issue.pull_request &&
+      (startsWith(github.event.comment.body, 'VM2_TI_PASS_260922') ||
+       startsWith(github.event.comment.body, 'VM2_TI_FAIL_260922'))
+    runs-on: ubuntu-latest
+    steps:
+      - name: Record non-secret GitHub provenance
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          ACTOR: ${{ github.actor }}
+          SHA: ${{ github.sha }}
+          REF: ${{ github.ref }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          COMMENT_USER: ${{ github.event.comment.user.login }}
+          PR_API_URL: ${{ github.event.issue.pull_request.url }}
+        run: |
+          printf 'EVENT_NAME=%s\nACTOR=%s\nSHA=%s\nREF=%s\nISSUE_NUMBER=%s\nCOMMENT_USER=%s\nPR_API_URL=%s\n' \
+            "$EVENT_NAME" "$ACTOR" "$SHA" "$REF" "$ISSUE_NUMBER" "$COMMENT_USER" "$PR_API_URL"
+
+      - name: Create controlled JUnit result
+        shell: bash
+        env:
+          COMMENT_BODY: ${{ github.event.comment.body }}
+        run: |
+          if [[ "$COMMENT_BODY" == VM2_TI_FAIL_260922* ]]; then
+            cat > vm2-junit.xml <<'XML'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <testsuites tests="1" failures="1" time="0.01">
+            <testsuite name="vm2.issue_comment.provenance" tests="1" failures="1" time="0.01">
+              <testcase classname="vm2.provenance" name="test_shared_identity" time="0.01">
+                <failure message="controlled issue_comment failure">controlled</failure>
+              </testcase>
+            </testsuite>
+          </testsuites>
+          XML
+          else
+            cat > vm2-junit.xml <<'XML'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <testsuites tests="1" failures="0" time="0.01">
+            <testsuite name="vm2.issue_comment.provenance" tests="1" failures="0" time="0.01">
+              <testcase classname="vm2.provenance" name="test_shared_identity" time="0.01"/>
+            </testsuite>
+          </testsuites>
+          XML
+          fi
+
+      - name: Upload to Mergify Test Insights
+        id: mergify-ci
+        uses: Mergifyio/gha-mergify-ci@v25
+        with:
+          action: junit-process
+          token: ${{ secrets.MERGIFY_TOKEN }}
+          report_path: vm2-junit.xml
+          job_name: vm2-issue-comment-provenance-job
+
+      - name: Show upload status
+        if: always()
+        run: echo "upload=${{ steps.mergify-ci.outputs.test_results_upload }}"
