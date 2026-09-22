@@ -11,8 +11,7 @@ jobs:
   provenance:
     if: >-
       github.event.issue.pull_request &&
-      (startsWith(github.event.comment.body, 'VM2_TI_PASS_260922') ||
-       startsWith(github.event.comment.body, 'VM2_TI_FAIL_260922'))
+      startsWith(github.event.comment.body, 'VM2_TI_PROBE_260922')
     runs-on: ubuntu-latest
     steps:
       - name: Record non-secret GitHub provenance
@@ -32,9 +31,9 @@ jobs:
       - name: Create controlled JUnit result
         shell: bash
         env:
-          COMMENT_BODY: ${{ github.event.comment.body }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: |
-          if [[ "$COMMENT_BODY" == VM2_TI_FAIL_260922* ]]; then
+          if [[ "$ISSUE_NUMBER" == "9" ]]; then
             cat > vm2-junit.xml <<'XML'
           <?xml version="1.0" encoding="UTF-8"?>
           <testsuites tests="1" failures="1" time="0.01">
