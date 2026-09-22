@@ -1,9 +1,1 @@
-pull_request_rules:
-  - name: vm2 wa post-success head race 260922
-    conditions:
-      - base = vm2-wa-headrace-target-260922
-      - title = VM2 WA HEADRACE 260922
-      - check-success = vm2-wa-headrace-guard
-    actions:
-      merge:
-        method: merge
+pull_request_rules: []
