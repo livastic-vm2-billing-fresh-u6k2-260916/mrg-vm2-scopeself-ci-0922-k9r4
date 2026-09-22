@@ -1,0 +1,7 @@
+scopes:
+  source:
+    files:
+      backend:
+        include:
+          - src/**
+pull_request_rules: []
