@@ -3,7 +3,7 @@ scopes:
     files:
       backend:
         include:
-          - docs/**
+          - src/**
 
 pull_request_rules:
   - name: VM2 scope self-config required-gate merge
