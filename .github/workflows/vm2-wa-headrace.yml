@@ -1,0 +1,22 @@
+name: VM2 WA Head Race Guard
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  guard:
+    name: vm2-wa-headrace-guard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate controlled marker
+        shell: bash
+        run: |
+          set -euo pipefail
+          marker="$(cat vm2-wa-headrace-marker.txt)"
+          echo "marker=$marker"
+          test "$marker" = "SAFE"
