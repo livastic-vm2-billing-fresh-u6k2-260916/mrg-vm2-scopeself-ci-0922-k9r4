@@ -1,16 +1,1 @@
-scopes:
-  source:
-    files:
-      backend:
-        include:
-          - src/**
-
-pull_request_rules:
-  - name: VM2 scope self-config required-gate merge
-    conditions:
-      - base = main
-      - title = VM2 scope self-config policy bypass
-      - "check-success = @github-actions/VM2 Scope CI Gate"
-    actions:
-      merge:
-        method: merge
+pull_request_rules: []
